@@ -9,61 +9,53 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+// 📩 Send Mail Route
 app.post("/send-mail", async (req, res) => {
-  const { senderName, senderEmail, appPassword, recipients, subject, message } = req.body;
-
   try {
-    if (!recipients) {
-      return res.json({ success: false, message: "❌ Failed: No recipients provided" });
+    const { senderName, gmail, appPassword, recipients, subject, message } = req.body;
+
+    if (!senderName || !gmail || !appPassword || !recipients || !subject || !message) {
+      return res.json({ success: false, message: "⚠️ Missing required fields" });
     }
 
-    let transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: senderEmail,
+        user: gmail,
         pass: appPassword,
       },
     });
 
-    const recipientList = recipients
-      .split("\n")
-      .map(r => r.trim())
-      .filter(r => r);
+    const recipientList = recipients.split("\n").map(r => r.trim()).filter(r => r);
 
-    if (recipientList.length === 0) {
-      return res.json({ success: false, message: "❌ Failed: Empty recipient list" });
+    for (let recipient of recipientList) {
+      try {
+        await transporter.sendMail({
+          from: `"${senderName}" <${gmail}>`,
+          to: recipient,
+          subject,
+          text: message,
+        });
+        console.log(`✅ Sent to: ${recipient}`);
+      } catch (innerError) {
+        console.error(`❌ Failed to ${recipient}:`, innerError);
+      }
     }
 
-    let mailOptions = {
-      from: `"${senderName}" <${senderEmail}>`,
-      to: senderEmail,
-      bcc: recipientList,
-      subject: subject || "(No Subject)",
-      text: message || "(No Message)",
-    };
+    res.json({ success: true, message: "✅ All mails processed" });
+  } catch (error) {
+    console.error("❌ Full Error:", error);
 
-    await transporter.sendMail(mailOptions);
-
-    res.json({ success: true, message: "✅ Mail sent privately to all recipients!" });
- } catch (error) {
-  console.error("❌ Full Error:", error);
-
-  res.json({
-    success: false,
-    message: "❌ Failed: " + (error && (error.message || error.toString() || JSON.stringify(error)))
-  });
-}
-
-
-    // ✅ अब हर हाल में readable message भेजेगा
-    let errorMsg =
-      (error && error.message) ||
-      (error && error.response) ||
-      (error && JSON.stringify(error)) ||
-      "Unknown error";
-
-    res.json({ success: false, message: "❌ Failed: " + errorMsg });
+    res.json({
+      success: false,
+      message: "❌ Failed: " + (error?.message || error?.toString() || JSON.stringify(error))
+    });
   }
+});
+
+// Routes
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
 app.listen(PORT, () => {
