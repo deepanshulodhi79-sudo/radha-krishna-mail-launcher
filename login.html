@@ -1,25 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Radha Krishna Mail Launcher — Login</title>
-  <link rel="stylesheet" href="/public/style.css" />
+  <meta charset="UTF-8">
+  <title>Radha Krishna Mail Launcher - Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="app-title">
-        <h1>🔐 <span class="gradient">Radha Krishna</span> Mail Launcher ✨</h1>
-        <p class="subtitle">Login to continue</p>
-      </div>
-      <div class="grid" style="gap: 12px;">
-        <div><label>Username</label><input id="username" placeholder="radha krishna" /></div>
-        <div><label>Password</label><input id="password" type="password" placeholder="shree krishna15" /></div>
-        <div><button id="loginBtn">Login</button></div>
-      </div>
-    </div>
+  <div class="login-container">
+    <h1>Radha Krishna Mail Launcher</h1>
+    <form onsubmit="return login(event)">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
   </div>
-  <script src="/public/script.js"></script>
+
+  <script>
+    function login(event) {
+      event.preventDefault();
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value.trim();
+
+      if (user === "radha krishna" && pass === "shree krishna15") {
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "/launcher";
+      } else {
+        alert("Invalid credentials");
+      }
+    }
+  </script>
 </body>
 </html>
