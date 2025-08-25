@@ -1,23 +1,7 @@
-const express = require("express");
-const nodemailer = require("nodemailer");
-const bodyParser = require("body-parser");
-const path = require("path");
-
-const app = express();
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
-
-// Default route -> login.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "login.html"));
-});
-
-// Mail sending route
 app.post("/send-mail", async (req, res) => {
   const { senderName, senderEmail, appPassword, recipients, subject, message } = req.body;
 
   try {
-    // Setup transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -26,29 +10,25 @@ app.post("/send-mail", async (req, res) => {
       },
     });
 
-    // Prepare mail options
-    const mailOptions = {
-      from: `"${senderName}" <${senderEmail}>`,
-      to: recipients,
-      subject: subject,
-      text: message,
-    };
+    // Recipients को line break से split करो
+    const recipientList = recipients.split("\n").map(r => r.trim()).filter(r => r);
 
-    // Send mail
-    await transporter.sendMail(mailOptions);
+    // हर receiver को अलग mail भेजो
+    for (const recipient of recipientList) {
+      const mailOptions = {
+        from: `"${senderName}" <${senderEmail}>`,
+        to: recipient,     // ✅ हर बार सिर्फ़ उसी की ID जाएगी
+        subject: subject,
+        text: message,
+      };
 
-    // ✅ If no error -> Success response
+      await transporter.sendMail(mailOptions);
+    }
+
     res.json({ success: true, msg: "Emails sent successfully!" });
 
   } catch (error) {
     console.error("Mail send error:", error);
-    // ❌ Failure response
     res.json({ success: false, msg: "Failed to send mail." });
   }
-});
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
