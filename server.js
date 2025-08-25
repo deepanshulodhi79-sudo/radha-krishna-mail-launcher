@@ -10,48 +10,49 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Routes
+// Default route → login.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// Send Mail Route
+// Send mail API
 app.post("/send-mail", async (req, res) => {
   const { senderName, senderEmail, appPassword, recipients, subject, message } = req.body;
 
   try {
+    // Gmail SMTP config
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: senderEmail,
-        pass: appPassword,
+        pass: appPassword, // App Password (not Gmail login password)
       },
     });
 
-    // Split recipients by new line
+    // Recipients ko array me convert karo
     const recipientList = recipients.split("\n").map(r => r.trim()).filter(r => r);
 
-    // Send to each recipient separately
-    for (const recipient of recipientList) {
-      const mailOptions = {
+    // Sab recipients ko ek-ek karke bhejna
+    for (let to of recipientList) {
+      await transporter.sendMail({
         from: `"${senderName}" <${senderEmail}>`,
-        to: recipient, // ✅ Each mail only goes to that one recipient
-        subject: subject,
+        to: to, // ek baar me ek hi ID jayegi
+        subject,
         text: message,
-      };
-
-      await transporter.sendMail(mailOptions);
+      });
     }
 
-    res.json({ success: true, msg: "Emails sent successfully!" });
+    res.json({ success: true, msg: "✅ Emails sent successfully!" });
 
   } catch (error) {
     console.error("Mail send error:", error);
-    res.json({ success: false, msg: "Failed to send mail." });
+    res.json({ success: false, msg: "❌ Failed: " + error.message });
   }
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
