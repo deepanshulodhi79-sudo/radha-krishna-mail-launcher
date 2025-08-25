@@ -1,25 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Radha Krishna Mail Launcher — Login</title>
-  <link rel="stylesheet" href="/public/style.css" />
+  <meta charset="UTF-8">
+  <title>Radha Krishna Mail Launcher - Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; justify-content: center; align-items: center; height: 100vh; margin:0; }
+    .login-box { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2); width: 300px; text-align: center; }
+    input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; }
+    button { padding: 10px; width: 100%; border: none; border-radius: 8px; background: #667eea; color: white; font-weight: bold; cursor: pointer; }
+    button:hover { background: #5563c1; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="app-title">
-        <h1>🔐 <span class="gradient">Radha Krishna</span> Mail Launcher ✨</h1>
-        <p class="subtitle">Login to continue</p>
-      </div>
-      <div class="grid" style="gap: 12px;">
-        <div><label>Username</label><input id="username" placeholder="radha krishna" /></div>
-        <div><label>Password</label><input id="password" type="password" placeholder="shree krishna15" /></div>
-        <div><button id="loginBtn">Login</button></div>
-      </div>
-    </div>
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="msg" style="color:red;"></p>
   </div>
-  <script src="/public/script.js"></script>
+
+  <script>
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/index.html';
+      } else {
+        document.getElementById('msg').innerText = data.message;
+      }
+    }
+  </script>
 </body>
 </html>
