@@ -27,14 +27,25 @@ app.post("/send-mail", async (req, res) => {
       secure: true,
       auth: {
         user: senderEmail,
-        pass: appPassword, // App Password (not Gmail login password)
+        pass: appPassword, // App Password
       },
     });
 
-    // Recipients ko array me convert karo
-    const recipientList = recipients.split("\n").map(r => r.trim()).filter(r => r);
+    // Recipients normalize karo
+    let recipientList = [];
+    if (typeof recipients === "string") {
+      // agar textarea se ek string aayi hai
+      recipientList = recipients.split("\n").map(r => r.trim()).filter(r => r);
+    } else if (Array.isArray(recipients)) {
+      // agar array aayi hai
+      recipientList = recipients.map(r => r.trim()).filter(r => r);
+    }
 
-    // Sab recipients ko ek-ek karke bhejna
+    if (recipientList.length === 0) {
+      return res.json({ success: false, msg: "❌ No recipients provided!" });
+    }
+
+    // Har recipient ko ek-ek mail bhejna
     for (let to of recipientList) {
       await transporter.sendMail({
         from: `"${senderName}" <${senderEmail}>`,
