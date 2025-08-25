@@ -45,8 +45,15 @@ app.post("/send-mail", async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     res.json({ success: true, message: "✅ Mail sent privately to all recipients!" });
-  } catch (error) {
-    console.error("❌ Error Object:", error);
+ } catch (error) {
+  console.error("❌ Full Error:", error);
+
+  res.json({
+    success: false,
+    message: "❌ Failed: " + (error && (error.message || error.toString() || JSON.stringify(error)))
+  });
+}
+
 
     // ✅ अब हर हाल में readable message भेजेगा
     let errorMsg =
