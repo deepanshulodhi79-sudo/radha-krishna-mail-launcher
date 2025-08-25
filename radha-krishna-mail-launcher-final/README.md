@@ -1,15 +1,21 @@
-# Radha Krishna Mail Launcher
+# Radha Krishna Mail Launcher 🚀
 
-### Features
-- Hardcoded login (username: radha krishna, password: shree krishna15)
+A modern mail launcher with login/logout system, Gmail integration, and spam-safe delay sending.
+
+---
+
+## ✨ Features
+- Secure Login (username: **radha krishna**, password: **shree krishna15**)
 - Logout + launcher page protection
-- Send mail using Gmail + App Password
+- Gmail sending with App Password
 - Multiple recipients (one per line)
-- Subject + Message
-- Per-email delay (dropdown)
-- Render + GitHub ready
+- Subject + Message inputs
+- Per-email delay to reduce spam risk
+- Stylish modern UI with animated title
 
-### Local Run
-```bash
-npm install
-npm start
+---
+
+## ⚡ How to Run Locally
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/your-username/radha-krishna-mail-launcher.git
