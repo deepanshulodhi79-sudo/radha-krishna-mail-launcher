@@ -1,40 +1,76 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Radha Krishna Mail Launcher</title>
-  <link rel="stylesheet" href="/public/style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #f3f4f6; margin:0; padding:20px; }
+    .container { max-width: 700px; margin: auto; background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    textarea, input, select { width: 100%; margin: 8px 0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: vertical; }
+    button { padding: 10px 20px; border: none; border-radius: 8px; background: #667eea; color: white; font-weight: bold; cursor: pointer; }
+    button:hover { background: #5563c1; }
+    .logout { float: right; background: #dc2626; }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <div class="app-title">
-        <h1>📨 <span class="gradient">Radha Krishna</span> Mail Launcher ✨</h1>
-        <p class="subtitle">A clean & modern way to send emails</p>
-      </div>
-
-      <div class="grid grid-2">
-        <div><label>Sender Name</label><input id="senderName" placeholder="Your Name" /></div>
-        <div><label>Gmail Address</label><input id="gmailAddress" placeholder="you@gmail.com" /></div>
-        <div><label>Gmail App Password</label><input id="gmailAppPassword" type="password" placeholder="16-digit App Password" /></div>
-        <div><label>Per-Email Delay (seconds)</label><input id="delaySec" type="number" min="0" value="5" /></div>
-      </div>
-
-      <div class="grid grid-2" style="margin-top:16px;">
-        <div><label>Recipients (one per line)</label><textarea id="recipients" placeholder="a@example.com&#10;b@example.com"></textarea></div>
-        <div>
-          <label>Subject</label><input id="subject" placeholder="Hello from Mail Launcher" />
-          <label style="margin-top:12px;">Message</label><textarea id="message" placeholder="Type your message here..."></textarea>
-        </div>
-      </div>
-
-      <div style="margin-top:16px;">
-        <button id="sendBtn">Send</button>
-        <button id="logoutBtn" style="width:auto;margin-left:12px;">Logout</button>
-      </div>
-    </div>
+    <button class="logout" onclick="logout()">Logout</button>
+    <h2>📧 Radha Krishna Mail Launcher</h2>
+    <input type="text" id="senderName" placeholder="Sender Name">
+    <input type="email" id="gmail" placeholder="Your Gmail">
+    <input type="password" id="appPassword" placeholder="App Password">
+    <textarea id="recipients" rows="4" placeholder="Recipients (one per line)"></textarea>
+    <input type="text" id="subject" placeholder="Subject">
+    <textarea id="message" rows="6" placeholder="Message"></textarea>
+    <label>Delay per email (ms):</label>
+    <select id="delay">
+      <option value="0">0</option>
+      <option value="1000">1000</option>
+      <option value="2000">2000</option>
+      <option value="3000">3000</option>
+    </select>
+    <button id="sendBtn" onclick="sendMail()">Send</button>
   </div>
-  <script src="/public/script.js"></script>
+
+  <script>
+    async function checkLogin() {
+      const res = await fetch('/api/check-login');
+      const data = await res.json();
+      if (!data.loggedIn) {
+        window.location.href = '/login.html';
+      }
+    }
+    checkLogin();
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    async function sendMail() {
+      const btn = document.getElementById('sendBtn');
+      btn.innerText = 'Sending...';
+      btn.disabled = true;
+
+      const senderName = document.getElementById('senderName').value;
+      const gmail = document.getElementById('gmail').value;
+      const appPassword = document.getElementById('appPassword').value;
+      const recipients = document.getElementById('recipients').value;
+      const subject = document.getElementById('subject').value;
+      const message = document.getElementById('message').value;
+      const delay = parseInt(document.getElementById('delay').value);
+
+      const res = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senderName, gmail, appPassword, recipients, subject, message, delay })
+      });
+      const data = await res.json();
+      alert(data.success ? "✅ Emails sent successfully" : "❌ Error: " + data.message);
+
+      btn.innerText = 'Send';
+      btn.disabled = false;
+    }
+  </script>
 </body>
 </html>
