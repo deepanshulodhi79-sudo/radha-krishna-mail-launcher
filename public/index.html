@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mail Launcher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <h2>Welcome to Mail Launcher</h2>
+    <button onclick="logout()">Logout</button>
+    <form>
+      <input type="text" id="senderName" placeholder="Sender Name" required>
+      <input type="email" id="senderEmail" placeholder="Sender Gmail" required>
+      <input type="password" id="appPassword" placeholder="App Password" required>
+      <textarea id="recipients" placeholder="Recipients (one per line)" required></textarea>
+      <input type="text" id="subject" placeholder="Subject" required>
+      <textarea id="message" placeholder="Message" required></textarea>
+      <label>Delay (ms per email): <input type="number" id="delay" value="2000"></label>
+      <button type="button" onclick="sendMails()">Send</button>
+    </form>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
