@@ -1,28 +1,4 @@
-function loginUser(event) {
-  event.preventDefault();
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (username === "radha krishna" && password === "shree krishna15") {
-    localStorage.setItem("isLoggedIn", "true");
-    window.location.href = "/launcher";
-  } else {
-    alert("Invalid credentials!");
-  }
-}
-
-function logout() {
-  localStorage.removeItem("isLoggedIn");
-  window.location.href = "/";
-}
-
-function checkAuth() {
-  if (!localStorage.getItem("isLoggedIn")) {
-    window.location.href = "/";
-  }
-}
-
-function sendMails() {
+async function sendMails() {
   const senderName = document.getElementById("senderName").value;
   const senderEmail = document.getElementById("senderEmail").value;
   const appPassword = document.getElementById("appPassword").value;
@@ -31,13 +7,21 @@ function sendMails() {
   const message = document.getElementById("message").value;
   const delay = parseInt(document.getElementById("delay").value, 10);
 
-  console.log("🚀 Sending mails...");
-  console.log({ senderName, senderEmail, appPassword, recipients, subject, message, delay });
+  try {
+    const res = await fetch("/send-mail", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ senderName, senderEmail, appPassword, recipients, subject, message })
+    });
 
-  alert("Demo only: Mail sending logic goes here!");
-}
-
-// protect launcher page
-if (window.location.pathname.includes("index.html") || window.location.pathname.includes("launcher")) {
-  checkAuth();
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ Emails sent successfully!");
+    } else {
+      alert("❌ Failed: " + data.msg);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error sending emails!");
+  }
 }
