@@ -1,6 +1,6 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
+const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
@@ -9,12 +9,12 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Mail API
+// ✅ Mail Sender Route
 app.post("/send-mail", async (req, res) => {
-  try {
-    const { senderName, senderEmail, appPassword, recipients, subject, message } = req.body;
+  const { senderName, senderEmail, appPassword, recipients, subject, message, delay } = req.body;
 
-    // transporter create
+  try {
+    // Mail transporter
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -23,22 +23,24 @@ app.post("/send-mail", async (req, res) => {
       },
     });
 
-    // recipients हमेशा string → array
-    let allRecipients = String(recipients).split("\n").map(r => r.trim()).filter(r => r);
+    // Recipient list split
+    const recipientList = recipients.split("\n").map(r => r.trim()).filter(r => r);
 
-    // सबको एक साथ भेजो (Inbox chance ↑)
-    await transporter.sendMail({
+    // ✅ Private Mode → use BCC
+    let mailOptions = {
       from: `"${senderName}" <${senderEmail}>`,
-      to: allRecipients.join(","),
-      subject,
+      to: senderEmail,       // सिर्फ़ खुद को visible रहेगा
+      bcc: recipientList,    // सब recipients को mail जाएगा, IDs hidden रहेंगी
+      subject: subject,
       text: message,
-    });
+    };
 
-    return res.json({ success: true, msg: `✅ Sent to all (${allRecipients.length})` });
+    await transporter.sendMail(mailOptions);
 
+    res.json({ success: true, message: "✅ Mail sent privately to all recipients!" });
   } catch (error) {
-    console.error("Mail Error:", error);
-    return res.json({ success: false, msg: "❌ Failed to send" });
+    console.error("❌ Error:", error);
+    res.json({ success: false, message: "❌ Failed: " + error.message });
   }
 });
 
