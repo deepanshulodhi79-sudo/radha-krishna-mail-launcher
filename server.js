@@ -34,10 +34,10 @@ app.post("/send", async (req, res) => {
   try {
     const { email, password, senderName, recipients, subject, message } = req.body;
 
-    if (!email || !password || !recipients || !subject || !message) {
-      return res.json({ success: false, message: "All fields are required" });
-    }
-
+  if (!email || !password || !recipients) {
+  return res.json({ success: false, message: "Sender email, password, and recipients are required" });
+}
+    
     // Gmail transporter
     let transporter = nodemailer.createTransport({
       service: "gmail",
