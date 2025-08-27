@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ Default route → Login page
+// ✅ Default route → Login
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
@@ -24,42 +24,48 @@ app.post("/login", (req, res) => {
   }
 });
 
-// ✅ Logout route
+// ✅ Logout
 app.post("/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
-// ✅ Send Mail (Clean version)
+// ✅ Send Mail
 app.post("/send", async (req, res) => {
   try {
-    const { email, password, recipients, subject, message, senderName } = req.body;
+    const { email, password, senderName, recipients, subject, message, delayMs } = req.body;
 
-    // Gmail transporter
-    let transporter = nodemailer.createTransport({
+    if (!email || !password || !recipients) {
+      return res.json({ success: false, message: "Email, password, and recipients are required" });
+    }
+
+    const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: {
-        user: email,     // ✅ यहां Gmail ID डालनी है
-        pass: password,  // ✅ यहां App Password (16-digit) डालना है
-      },
+      auth: { user: email, pass: password },
     });
 
-    // Mail options
-    let mailOptions = {
-      from: `"${senderName || "Anonymous"}" <${email}>`, // अगर senderName नहीं दिया तो "Anonymous"
-      to: recipients,
-      subject: subject || "No Subject",
-      text: message || "No message",
-    };
+    const recipientList = recipients.split(/[\n,]+/).map(r => r.trim()).filter(r => r);
 
-    let info = await transporter.sendMail(mailOptions);
-    console.log("✅ Mail sent:", info.response);
+    for (let i = 0; i < recipientList.length; i++) {
+      let mailOptions = {
+        from: `"${senderName || "Anonymous"}" <${email}>`,
+        to: recipientList[i],
+        subject: subject || "No Subject",
+        text: message || "",
+      };
 
-    res.json({ success: true, message: "Mail sent successfully!" });
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Mail sent to ${recipientList[i]}`);
+
+      if (delayMs) {
+        await new Promise(resolve => setTimeout(resolve, parseInt(delayMs)));
+      }
+    }
+
+    res.json({ success: true, message: "All mails sent successfully ✅" });
   } catch (err) {
-    console.error("❌ Error while sending mail:", err.message);
+    console.error("❌ Mail error:", err.message);
     res.json({ success: false, message: err.message });
   }
 });
 
-// ✅ Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
