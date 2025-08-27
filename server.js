@@ -29,38 +29,34 @@ app.post("/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
-// ✅ Send Mail
+// ✅ Send Mail (Clean version)
 app.post("/send", async (req, res) => {
   try {
-    const { email, password, senderName, recipients, subject, message } = req.body;
+    const { email, password, recipients, subject, message, senderName } = req.body;
 
-  if (!email || !password || !recipients) {
-  return res.json({ success: false, message: "Sender email, password, and recipients are required" });
-}
-    
     // Gmail transporter
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: email,
-        pass: password,
+        user: email,     // ✅ यहां Gmail ID डालनी है
+        pass: password,  // ✅ यहां App Password (16-digit) डालना है
       },
     });
 
-    // ✅ Clean mail body (no duplicate email/time)
+    // Mail options
     let mailOptions = {
-      from: `"${senderName}" <${email}>`,
+      from: `"${senderName || "Anonymous"}" <${email}>`, // अगर senderName नहीं दिया तो "Anonymous"
       to: recipients,
-      subject: subject,
-      text: message, // ✅ Only the message content
+      subject: subject || "No Subject",
+      text: message || "No message",
     };
 
     let info = await transporter.sendMail(mailOptions);
+    console.log("✅ Mail sent:", info.response);
 
-    console.log("✅ Email sent:", info.response);
-    res.json({ success: true, message: "Email sent successfully!" });
+    res.json({ success: true, message: "Mail sent successfully!" });
   } catch (err) {
-    console.error("❌ Mail send failed:", err);
+    console.error("❌ Error while sending mail:", err.message);
     res.json({ success: false, message: err.message });
   }
 });
