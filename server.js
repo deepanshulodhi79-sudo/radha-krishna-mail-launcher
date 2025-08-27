@@ -4,12 +4,12 @@ const path = require("path");
 const bodyParser = require("body-parser");
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Default route -> login page
+// ✅ Default route → Login page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
@@ -18,68 +18,52 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
   if (username === "radha krishna" && password === "shree krishna15") {
-    return res.json({ success: true });
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, message: "Invalid credentials" });
   }
-  return res.json({ success: false, message: "Invalid credentials" });
 });
 
-// ✅ Helper delay
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// ✅ Logout route
+app.post("/logout", (req, res) => {
+  res.json({ success: true, message: "Logged out successfully" });
+});
 
-// ✅ Send route
+// ✅ Send Mail
 app.post("/send", async (req, res) => {
-  const { senderName, email, pass, recipients, subject, message, delayMs } = req.body;
-
-  if (!senderName || !email || !pass || !recipients || !subject || !message) {
-    return res.json({ success: false, message: "⚠️ Please fill all fields." });
-  }
-
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: email, pass: pass }
-    });
+    const { email, password, senderName, recipients, subject, message } = req.body;
 
-    const list = recipients.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
-
-    let sent = 0;
-    let failed = 0;
-    let errors = [];
-
-    for (let i = 0; i < list.length; i++) {
-      const to = list[i];
-      try {
-        await transporter.sendMail({
-          from: `"${senderName}" <${email}>`,
-          to,
-          subject,
-          text: message
-        });
-        sent++;
-        console.log(`✅ Sent to ${to}`);
-      } catch (e) {
-        failed++;
-        errors.push({ to, error: e.message });
-        console.error(`❌ ${to} -> ${e.message}`);
-      }
-
-      if (i < list.length - 1) {
-        const gap = Number(delayMs) || 3000; // default 3s
-        await sleep(gap);
-      }
+    if (!email || !password || !recipients || !subject || !message) {
+      return res.json({ success: false, message: "All fields are required" });
     }
 
-    return res.json({
-      success: true,
-      message: `✅ Done: Sent ${sent}, Failed ${failed}`,
-      details: errors
+    // Gmail transporter
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: email,
+        pass: password,
+      },
     });
+
+    // ✅ Clean mail body (no duplicate email/time)
+    let mailOptions = {
+      from: `"${senderName}" <${email}>`,
+      to: recipients,
+      subject: subject,
+      text: message, // ✅ Only the message content
+    };
+
+    let info = await transporter.sendMail(mailOptions);
+
+    console.log("✅ Email sent:", info.response);
+    res.json({ success: true, message: "Email sent successfully!" });
   } catch (err) {
-    console.error(err);
-    return res.json({ success: false, message: "❌ " + err.message });
+    console.error("❌ Mail send failed:", err);
+    res.json({ success: false, message: err.message });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// ✅ Start server
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
