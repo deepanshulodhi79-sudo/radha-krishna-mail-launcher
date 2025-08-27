@@ -1,4 +1,4 @@
-// ✅ Protect launcher.html
+// ✅ Protect launcher
 (function protect() {
   const isLauncher = window.location.pathname.endsWith("launcher.html");
   if (isLauncher && localStorage.getItem("loggedIn") !== "true") {
@@ -22,7 +22,7 @@ function login() {
       localStorage.setItem("loggedIn", "true");
       window.location.href = "launcher.html";
     } else {
-      document.getElementById("loginStatus").innerText = data.message || "Invalid credentials";
+      document.getElementById("loginStatus").innerText = data.message;
     }
   });
 }
@@ -30,6 +30,7 @@ function login() {
 // ✅ Logout
 function logout() {
   localStorage.removeItem("loggedIn");
+  fetch("/logout", { method: "POST" });
   window.location.href = "login.html";
 }
 
@@ -37,7 +38,7 @@ function logout() {
 function sendMail() {
   const senderName = document.getElementById("senderName").value;
   const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
+  const password = document.getElementById("pass").value;  // ✅ fixed field name
   const recipients = document.getElementById("recipients").value;
   const subject = document.getElementById("subject").value;
   const message = document.getElementById("message").value;
@@ -59,7 +60,7 @@ function sendMail() {
     statusMessage.innerText = data.message;
   })
   .catch(err => {
-    statusMessage.innerText = "❌ Error: " + err.message;
+    statusMessage.innerText = "❌ " + err.message;
   })
   .finally(() => {
     sendBtn.disabled = false;
