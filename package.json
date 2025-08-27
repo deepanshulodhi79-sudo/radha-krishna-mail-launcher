@@ -1,0 +1,19 @@
+{
+  "name": "radha-krishna-mail-launcher",
+  "version": "1.0.0",
+  "description": "Simple bulk mail launcher with delay, login, and clean UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "you",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.14"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
