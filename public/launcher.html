@@ -1,27 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Mail Launcher</title>
+  <title>Bulk Mailer</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     <h2>📧 Bulk Mail Launcher</h2>
 
-    <input type="text" id="senderName" placeholder="Sender Name">
-    <input type="text" id="email" placeholder="Your Gmail">
-    <input type="password" id="pass" placeholder="App Password">
+    <input id="senderName" placeholder="Sender Name">
+    <input id="email" placeholder="Your Gmail">
+    <input id="pass" type="password" placeholder="App Password">
 
-    <textarea id="recipients" placeholder="Enter recipient emails (one per line)"></textarea>
-    <input type="text" id="subject" placeholder="Subject">
-    <textarea id="message" placeholder="Write your message here..."></textarea>
-
-    <label>Delay (ms):</label>
-    <input type="number" id="delayMs" value="3000">
+    <textarea id="recipients" placeholder="Recipients (comma or newline separated)"></textarea>
+    <input id="subject" placeholder="Subject">
+    <textarea id="message" placeholder="Message"></textarea>
+    <input id="delayMs" type="number" placeholder="Delay (ms)" value="1000">
 
     <button id="sendBtn" onclick="sendMail()">Send Mails</button>
+    <button onclick="logout()">Logout</button>
+
     <p id="statusMessage"></p>
   </div>
   <script src="script.js"></script>
