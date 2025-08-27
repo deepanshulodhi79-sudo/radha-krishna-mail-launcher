@@ -52,7 +52,7 @@ function sendMail() {
   fetch("/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ senderName, email, pass, recipients, subject, message, delayMs })
+    body: JSON.stringify({ senderName, email, password, recipients, subject, message, delayMs })
   })
   .then(res => res.json())
   .then(data => {
